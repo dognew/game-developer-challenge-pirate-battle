@@ -1,0 +1,46 @@
+/* 
+ * Reusable Game Button Styles
+ * Utilizes the UI sheet assets for normal, hover, and pressed states.
+ */
+.game-button {
+    appearance: none;
+    border: none;
+    background-color: transparent;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    font-family: sans-serif; /* We will swap this for a game font later */
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    padding: 15px 40px;
+    min-width: 200px;
+    min-height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.1s ease-in-out;
+}
+
+/* Primary Variant */
+.game-button.primary {
+    background-image: url('/assets/png/default/ui/menu/button_primary_normal.png');
+}
+.game-button.primary:hover {
+    background-image: url('/assets/png/default/ui/menu/button_primary_hover.png');
+}
+.game-button.primary:active {
+    background-image: url('/assets/png/default/ui/menu/button_primary_pressed.png');
+    transform: scale(0.95);
+}
+
+/* Secondary Variant */
+.game-button.secondary {
+    background-image: url('/assets/png/default/ui/menu/button_secondary_normal.png');
+}
+.game-button.secondary:active {
+    background-image: url('/assets/png/default/ui/menu/button_secondary_pressed.png');
+    transform: scale(0.95);
+}

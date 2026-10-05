@@ -1,0 +1,47 @@
+/* 
+ * Fullscreen Request Modal
+ * Overlays the entire screen until the user grants fullscreen permission.
+ */
+.panel-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 20px 0;
+    z-index: 100;
+}
+
+.game-panel {
+    background-image: url('/assets/png/default/ui/menu/panel_menu.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    width: 90vw;
+    max-width: 450px;
+    height: auto;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.game-panel h2 {
+    margin-bottom: 15px;
+    font-size: clamp(1.2rem, 5vh, 1.8rem);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.game-panel p {
+    margin-bottom: 25px;
+    font-size: clamp(0.9rem, 3.5vh, 1.1rem);
+    line-height: 1.4;
+}
