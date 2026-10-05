@@ -1,75 +1,51 @@
-# React + TypeScript + Vite
+# Pirate Battle
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**[Live Demo](URL_HERE)**
 
-Currently, two official plugins are available:
+A browser-based 2D naval combat simulation built with React and PixiJS. This project was developed as a technical challenge. For the full requirements of challenge, please see [README-CHALLENGE.md](README-CHALLENGE.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+For detailed technical decisions, simulation cycle mechanics, and API integration contracts, please refer to the [Architecture Documentation](ARCHITECTURE.md).
 
-## React Compiler
+## Technical Overview
+* **Custom Physics & Collisions:** AABB collision detection and entity movement calculated independently using fixed delta time.
+* **State Decoupling:** React UI components overlay the game canvas without triggering render cycles during the PixiJS game loop.
+* **Network Resilience:** Mocked REST APIs using MSW. TanStack Query handles caching and retries, while a local storage queue manages pending state recovery for history and rankings.
+* **Automated Testing:** E2E workflows and visual regression testing (with versioned baselines) implemented via Playwright.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Controls
+* [TODO: Document keyboard and touch controls for movement, rotation, and firing.]
 
-## Expanding the ESLint configuration
+## Gameplay Configuration
+* [TODO: Explain how to adjust match duration and spawn rates via the Options menu.]
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Network Scenarios, Mocking & Reset
+* [TODO: Document how to select network conditions (500 errors, timeouts, empty states) via the MSW control panel, and how to reset the scenarios to the initial state.]
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Reproducing Failures
+* [TODO: Provide step-by-step instructions to reproduce API failure recovery and timeout handling during gameplay.]
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Setup & Commands
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
+- Node.js (v20+)
+
+### Installation
+```bash
+npm ci
 
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+None required for standard execution. Copy `.env.example` to `.env` if local port overrides are needed.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Commands
 
-```
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Starts the development server with MSW enabled. |
+| `npm run build` | Builds the application for production. |
+| `npm run preview` | Locally previews the production build. |
+| `npm run lint` | Runs ESLint for code quality. |
+| `npm run type-check` | Runs TypeScript compiler check (`tsc --noEmit`). |
+| `npx playwright test` | Runs E2E workflows and visual regression tests. |
