@@ -21,3 +21,6 @@
 
 ## Balancing & Limitations
 [TODO: Record specific technical decisions, such as simplified enemy steering behaviors, UI scaling constraints on mobile, and performance trade-offs.]
+* **Single Source of Truth:** Game balancing (speeds, health, damage, spawn times) is strictly centralized in the `Config.ts` file via the `DEFAULT_CONFIG` object.
+* **Frame-Rate Independence:** All numeric parameters for movement and time are modeled in milliseconds and pixels/radians per second, ensuring the game engine (PixiJS) calculates physics based on *Delta Time* (actual elapsed time) rather than the user machine's frame rate (FPS).
+* **Typing:** Strict interfaces (`RootGameConfig`, `ShipConfig`, etc.) ensure that the React Options screen and the PixiJS Engine share the exact same data structure, preventing configuration injection runtime errors.
