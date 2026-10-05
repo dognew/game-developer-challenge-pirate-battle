@@ -3,6 +3,7 @@ import { useOrientation } from './hooks/useOrientation';
 import { PanelModal } from './components/ui/PanelModal';
 import { Button } from './components/ui/Button';
 import './index.css';
+import { MainMenu } from './components/menu/MainMenu';
 
 export default function App() {
   const isLandscape = useOrientation();
@@ -63,13 +64,7 @@ export default function App() {
   // Main application state (Ready to load Menus and PixiJS)
   return (
     <div className="app-container">
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <img 
-          src="/assets/png/default/ui/menu/title_pirate_battle.png" 
-          alt="Pirate Battle" 
-          style={{ marginBottom: '40px', maxWidth: '80%' }}
-        />
-      </div>
+      <MainMenu />
     </div>
   );
 }

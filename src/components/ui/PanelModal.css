@@ -32,6 +32,7 @@
     padding: 40px;
     text-align: center;
     color: #ffffff;
+    margin: auto; /* Critical: centers the panel vertically on desktop */
 }
 
 .game-panel h2 {
