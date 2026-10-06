@@ -240,9 +240,12 @@ export class GameEngine {
             
             if (enemy.isDestroyed) {
                 enemy.parent?.removeChild(enemy);
+                enemy.destroy({ children: true });
                 this.enemies.splice(i, 1);
                 continue;
             }
+
+            if (enemy instanceof ChaserEnemy && enemy.isExploding) continue;
 
             const prevX = enemy.x;
             const prevY = enemy.y;
@@ -294,7 +297,7 @@ export class GameEngine {
             if (enemy instanceof ChaserEnemy) {
                 const distToPlayer = Math.hypot(enemy.x - this.player.x, enemy.y - this.player.y);
                 if (distToPlayer < 40) { // Arbitrary collision radius
-                    enemy.isDestroyed = true;
+                    enemy.explode();
                     
                     // Player takes damage
                     this.player.takeDamage(DEFAULT_CONFIG.enemies.chaser.impactDamage);
@@ -334,7 +337,7 @@ export class GameEngine {
                     if (proj.ownerType === 'player') {
                         // Player's bullets hit enemies
                         for (const enemy of this.enemies) {
-                            if (enemy.isDestroyed) continue;
+                            if (enemy.isDestroyed || (enemy instanceof ChaserEnemy && enemy.isExploding)) continue;
                             const dist = Math.hypot(proj.x - enemy.x, proj.y - enemy.y);
                             if (dist < 32) {
                                 hit = true;

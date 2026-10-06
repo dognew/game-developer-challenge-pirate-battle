@@ -8,7 +8,9 @@ import { ShipBase } from './ShipBase';
  */
 export class ChaserEnemy extends ShipBase {
     private shipSprite: PIXI.Sprite;
+    private explosion: PIXI.AnimatedSprite | null = null;
     public isDestroyed = false;
+    public isExploding = false;
 
     constructor() {
         // Slightly faster physics to catch the player
@@ -36,7 +38,7 @@ export class ChaserEnemy extends ShipBase {
      * Modifies the internal intents based on the target position.
      */
     public chaseTarget(targetX: number, targetY: number): void {
-        if (this.isDestroyed) return;
+        if (this.isDestroyed || this.isExploding) return;
 
         // Angle between enemy and target
         const dx = targetX - this.x;
@@ -57,5 +59,31 @@ export class ChaserEnemy extends ShipBase {
         
         // Always try to move forward
         this.intent.forward = true;
+    }
+
+    public explode(): void {
+        if (this.isExploding || this.isDestroyed) return;
+
+        this.isExploding = true;
+        this.shipSprite.visible = false;
+        this.healthBarContainer.visible = false;
+
+        this.explosion = new PIXI.AnimatedSprite([
+            AssetManager.getShipTexture('explosion_1.png'),
+            AssetManager.getShipTexture('explosion_2.png'),
+            AssetManager.getShipTexture('explosion_3.png'),
+        ]);
+        this.explosion.anchor.set(0.5);
+        this.explosion.animationSpeed = 0.15;
+        this.explosion.loop = false;
+        this.explosion.onComplete = () => {
+            this.isDestroyed = true;
+            this.parent?.removeChild(this);
+            this.explosion?.parent?.removeChild(this.explosion);
+            this.explosion?.destroy();
+            this.explosion = null;
+        };
+        this.addChild(this.explosion);
+        this.explosion.play();
     }
 }
