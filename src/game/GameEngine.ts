@@ -6,12 +6,19 @@ import { Projectile } from './actors/Projectile';
 import { ChaserEnemy } from './actors/ChaserEnemy';
 import { ShooterEnemy } from './actors/ShooterEnemy';
 
+export type MatchEndReason = 'player-defeated' | 'time-expired';
+
+export interface MatchSummary {
+    reason: MatchEndReason;
+    score: number;
+    durationMs: number;
+}
+
 /**
  * Core Game Engine
  * Manages procedural generation, physics, game loop, and entity lifecycle.
  */
 export class GameEngine {
-    private _app: PIXI.Application;
     private _actorsLayer: PIXI.Container;
     private terrainLayer: PIXI.Container;
     private projectilesLayer: PIXI.Container;
@@ -26,9 +33,17 @@ export class GameEngine {
 
     private timeSinceLastSpawn: number = 0;
     private matchTimeMs: number = 0;
+    private score = 0;
+    private matchEnded = false;
+    private readonly onMatchEnd: (summary: MatchSummary) => void;
 
-    constructor(app: PIXI.Application, terrainLayer: PIXI.Container, actorsLayer: PIXI.Container, projectilesLayer: PIXI.Container) {
-        this._app = app;
+    constructor(
+        terrainLayer: PIXI.Container,
+        actorsLayer: PIXI.Container,
+        projectilesLayer: PIXI.Container,
+        onMatchEnd: (summary: MatchSummary) => void,
+    ) {
+        this.onMatchEnd = onMatchEnd;
         this.terrainLayer = terrainLayer;
         this._actorsLayer = actorsLayer;
         this.projectilesLayer = projectilesLayer;
@@ -42,6 +57,8 @@ export class GameEngine {
     }
 
     public startMatch(): void {
+        if (this.matchEnded) return;
+
         const occupiedSectors = this.generateArena();
         this.spawnPlayer(occupiedSectors);
 
@@ -168,8 +185,19 @@ export class GameEngine {
     }
 
     private gameLoop(): void {
+        if (this.matchEnded) return;
+
         const deltaMs = this.ticker.deltaMS;
-        this.matchTimeMs += deltaMs;
+        this.matchTimeMs = Math.min(
+            this.matchTimeMs + deltaMs,
+            DEFAULT_CONFIG.match.sessionTimeMs,
+        );
+
+        if (this.matchTimeMs >= DEFAULT_CONFIG.match.sessionTimeMs) {
+            this.finishMatch('time-expired');
+            return;
+        }
+
         this.timeSinceLastSpawn += deltaMs;
 
         // 1. Spawner Logic
@@ -269,9 +297,10 @@ export class GameEngine {
                     enemy.isDestroyed = true;
                     
                     // Player takes damage
-                    this.player.currentHealth -= DEFAULT_CONFIG.enemies.chaser.impactDamage;
-                    if (this.player.currentHealth <= 0) {
-                        console.log("Player is dead!"); // TODO: Game Over
+                    this.player.takeDamage(DEFAULT_CONFIG.enemies.chaser.impactDamage);
+                    if (this.player.isDead) {
+                        this.finishMatch('player-defeated');
+                        return;
                     }
                 }
             }
@@ -309,10 +338,10 @@ export class GameEngine {
                             const dist = Math.hypot(proj.x - enemy.x, proj.y - enemy.y);
                             if (dist < 32) {
                                 hit = true;
-                                // Manipulação direta da saúde para evitar o TypeError de métodos não reconhecidos
-                                enemy.currentHealth -= proj.damage;
-                                if (enemy.currentHealth <= 0) {
+                                enemy.takeDamage(proj.damage);
+                                if (enemy.isDead) {
                                     enemy.isDestroyed = true;
+                                    this.score += 1;
                                 }
                                 break;
                             }
@@ -322,11 +351,11 @@ export class GameEngine {
                         const distToPlayer = Math.hypot(proj.x - this.player.x, proj.y - this.player.y);
                         if (distToPlayer < 32) {
                             hit = true;
-                            // Manipulação direta da saúde do jogador
-                            this.player.currentHealth -= proj.damage;
-                            if (this.player.currentHealth <= 0) {
-                                console.log("Player is dead!"); // Placeholder for death event
-                                // Aqui poderá adicionar lógica adicional de fim de jogo posteriormente
+                            this.player.takeDamage(proj.damage);
+                            if (this.player.isDead) {
+                                proj.explode();
+                                this.finishMatch('player-defeated');
+                                return;
                             }
                         }
                     }
@@ -335,6 +364,18 @@ export class GameEngine {
                 if (hit) proj.explode();
             }
         }
+    }
+
+    private finishMatch(reason: MatchEndReason): void {
+        if (this.matchEnded) return;
+
+        this.matchEnded = true;
+        this.ticker.stop();
+        this.onMatchEnd({
+            reason,
+            score: this.score,
+            durationMs: this.matchTimeMs,
+        });
     }
 
     public destroy(): void {

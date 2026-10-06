@@ -1,14 +1,12 @@
 import * as PIXI from 'pixi.js';
 import { AssetManager } from '../AssetManager';
 import { ShipBase } from './ShipBase';
-import { DEFAULT_CONFIG } from '../Config';
 
 /**
  * Shooter Enemy Ship.
  * Approaches the player and fires projectiles when within a specific attack range.
  */
 export class ShooterEnemy extends ShipBase {
-    public currentHealth: number = DEFAULT_CONFIG.enemies.shooter.maxHealth;
     private shipSprite: PIXI.Sprite;
     public frontCannon: PIXI.Sprite;
     public isDestroyed = false;
@@ -31,6 +29,7 @@ export class ShooterEnemy extends ShipBase {
         this.shipSprite = new PIXI.Sprite(AssetManager.getShipTexture('ship_3.png'));
         this.shipSprite.anchor.set(0.5);
         this.addChild(this.shipSprite);
+        this.setDamageVisualTarget(this.shipSprite);
 
         this.frontCannon = new PIXI.Sprite(AssetManager.getShipTexture('cannon.png'));
         this.frontCannon.anchor.set(0.5);

@@ -64,6 +64,7 @@ export class PlayerShip extends ShipBase {
         this.shipSprite = new PIXI.Sprite(AssetManager.getShipTexture('ship_1.png'));
         this.shipSprite.anchor.set(0.5);
         this.addChild(this.shipSprite);
+        this.setDamageVisualTarget(this.shipSprite);
 
         this.frontCannon = new PIXI.Sprite(AssetManager.getShipTexture('cannon.png'));
         this.frontCannon.anchor.set(0.5);
@@ -86,6 +87,8 @@ export class PlayerShip extends ShipBase {
     private onKeyUp = (e: KeyboardEvent): void => { this.setInput(e.key, false); };
 
     public setInput(action: string, isPressed: boolean): void {
+        if (this.isDead) return;
+
         const key = action.toLowerCase();
         if (this.keys.hasOwnProperty(key)) {
             this.keys[key] = isPressed;
@@ -93,6 +96,8 @@ export class PlayerShip extends ShipBase {
     }
 
     public update(deltaMs: number): void {
+        if (this.isDead) return;
+
         // Map raw inputs to physics intents before calling super.update
         this.intent.forward = this.keys['w'];
         this.intent.backward = this.keys['s'];
@@ -120,7 +125,7 @@ export class PlayerShip extends ShipBase {
     }
 
     public fireFront(): void {
-        if (this.frontCooldown > 0 || !this.onFire) return;
+        if (this.isDead || this.frontCooldown > 0 || !this.onFire) return;
         this.frontCooldown = DEFAULT_CONFIG.player.frontWeapon.cooldownMs;
 
         const heading = this.rotation + Math.PI / 2; 
@@ -131,7 +136,7 @@ export class PlayerShip extends ShipBase {
     }
 
     public fireLeft(): void {
-        if (this.leftCooldown > 0 || !this.onFire) return;
+        if (this.isDead || this.leftCooldown > 0 || !this.onFire) return;
         this.leftCooldown = DEFAULT_CONFIG.player.sideWeapon.cooldownMs;
         this.leftFireTimer = 150;
         this.leftCannons.forEach(c => c.visible = true);
@@ -148,7 +153,7 @@ export class PlayerShip extends ShipBase {
     }
 
     public fireRight(): void {
-        if (this.rightCooldown > 0 || !this.onFire) return;
+        if (this.isDead || this.rightCooldown > 0 || !this.onFire) return;
         this.rightCooldown = DEFAULT_CONFIG.player.sideWeapon.cooldownMs;
         this.rightFireTimer = 150;
         this.rightCannons.forEach(c => c.visible = true);
@@ -162,6 +167,16 @@ export class PlayerShip extends ShipBase {
         }));
 
         this.onFire(projectiles);
+    }
+
+    protected onDeath(): void {
+        super.onDeath();
+        Object.keys(this.keys).forEach((key) => this.keys[key] = false);
+        this.shipSprite.texture = AssetManager.getShipTexture('ship_19.png');
+        this.frontCannon.visible = false;
+        this.leftCannons.forEach((cannon) => cannon.visible = false);
+        this.rightCannons.forEach((cannon) => cannon.visible = false);
+        this.onFire = undefined;
     }
 
     public destroy(options?: PIXI.DestroyOptions): void {

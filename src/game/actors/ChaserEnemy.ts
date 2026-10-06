@@ -26,6 +26,7 @@ export class ChaserEnemy extends ShipBase {
         this.shipSprite = new PIXI.Sprite(AssetManager.getShipTexture('ship_7.png'));
         this.shipSprite.anchor.set(0.5);
         this.addChild(this.shipSprite);
+        this.setDamageVisualTarget(this.shipSprite);
 
         // Ensures the UI elements rendered in super() are on top of ship sprites
         this.setChildIndex(this.healthBarContainer, this.children.length - 1);

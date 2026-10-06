@@ -12,6 +12,12 @@ export default function App() {
   
   // Controls the main routing of the application
   const [appState, setAppState] = useState<'menu' | 'playing'>('menu');
+  const [gameSessionKey, setGameSessionKey] = useState(0);
+
+  const startGame = () => {
+    setGameSessionKey((key) => key + 1);
+    setAppState('playing');
+  };
 
   // Monitor fullscreen exits to restore the modal
   useEffect(() => {
@@ -65,9 +71,13 @@ export default function App() {
   return (
     <div className="app-container">
       {appState === 'menu' ? (
-        <MainMenu onPlay={() => setAppState('playing')} />
+        <MainMenu onPlay={startGame} />
       ) : (
-        <GameScreen onExit={() => setAppState('menu')} />
+        <GameScreen
+          key={gameSessionKey}
+          onExit={() => setAppState('menu')}
+          onRestart={startGame}
+        />
       )}
     </div>
   );

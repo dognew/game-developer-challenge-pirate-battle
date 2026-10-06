@@ -37,6 +37,7 @@ export abstract class ShipBase extends PIXI.Container {
     protected physics: ShipPhysics;
     protected inShallowWater = false;
     public currentHealth: number;
+    public isDead = false;
 
     // Movement intent defined by child classes (Inputs or AI)
     protected intent = { forward: false, backward: false, left: false, right: false };
@@ -47,6 +48,8 @@ export abstract class ShipBase extends PIXI.Container {
     protected healthFillSprite!: PIXI.Sprite;
     private readonly healthBarLayout: HealthBarLayout;
     private readonly healthFillTextures: { green: PIXI.Texture; amber?: PIXI.Texture; red: PIXI.Texture };
+    private damageVisualTarget: PIXI.Sprite | null = null;
+    protected damageEffects: PIXI.Sprite[] = [];
 
     constructor(physics: ShipPhysics, healthBarStyle: HealthBarStyle = 'enemy') {
         super();
@@ -148,6 +151,76 @@ export abstract class ShipBase extends PIXI.Container {
         }
     }
 
+    protected setDamageVisualTarget(shipSprite: PIXI.Sprite): void {
+        this.damageVisualTarget = shipSprite;
+        this.damageEffects = [
+            new PIXI.Sprite(AssetManager.getShipTexture('fire_2.png')),
+            new PIXI.Sprite(AssetManager.getShipTexture('fire_1.png')),
+            new PIXI.Sprite(AssetManager.getShipTexture('fire_2.png')),
+        ];
+
+        const positions = [
+            { x: -10, y: -15 },
+            { x: 7, y: 8 },
+            { x: -4, y: 27 },
+        ];
+
+        this.damageEffects.forEach((effect, index) => {
+            effect.anchor.set(0.5, 0.8);
+            effect.scale.set(0.65);
+            effect.position.set(positions[index].x, positions[index].y);
+            effect.visible = false;
+            this.addChild(effect);
+        });
+
+        this.updateDamageVisual();
+    }
+
+    public takeDamage(amount: number): void {
+        if (!Number.isFinite(amount) || amount <= 0 || this.isDead) return;
+
+        this.currentHealth = Math.max(0, this.currentHealth - amount);
+        this.updateHealthUI();
+        this.updateDamageVisual();
+
+        if (this.currentHealth === 0) {
+            this.isDead = true;
+            this.onDeath();
+        }
+    }
+
+    protected onDeath(): void {
+        this.physics.speed = 0;
+        this.intent.forward = false;
+        this.intent.backward = false;
+        this.intent.left = false;
+        this.intent.right = false;
+        this.damageEffects.forEach((effect) => effect.visible = false);
+    }
+
+    private updateDamageVisual(): void {
+        if (!this.damageVisualTarget) return;
+
+        const healthPercent = Math.min(1, Math.max(0, this.currentHealth / this.physics.maxHealth));
+        const damageStage = healthPercent <= 0.25
+            ? 3
+            : healthPercent <= 0.5
+                ? 2
+                : healthPercent <= 0.75
+                    ? 1
+                    : 0;
+
+        this.damageVisualTarget.tint = healthPercent <= 0.25
+            ? 0xff9999
+            : healthPercent <= 0.5
+                ? 0xffcccc
+                : 0xffffff;
+
+        this.damageEffects.forEach((effect, index) => {
+            effect.visible = index < damageStage;
+        });
+    }
+
     public setInShallowWater(status: boolean): void {
         this.inShallowWater = status;
     }
@@ -163,6 +236,8 @@ export abstract class ShipBase extends PIXI.Container {
      * Core update loop for physics and translation.
      */
     public update(_deltaMs: number): void {
+        if (this.isDead) return;
+
         if (this.intent.left) this.rotation -= this.physics.rotationSpeed;
         if (this.intent.right) this.rotation += this.physics.rotationSpeed;
 
@@ -186,7 +261,5 @@ export abstract class ShipBase extends PIXI.Container {
 
         // Counter-rotate the health bar to keep it horizontal
         this.healthBarContainer.rotation = -this.rotation;
-
-        this.updateHealthUI();
     }
 }

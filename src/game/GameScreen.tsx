@@ -4,10 +4,11 @@ import { Button } from '../components/ui/Button';
 import * as PIXI from 'pixi.js';
 import { AssetManager } from './AssetManager';
 import { ARENA_WIDTH, ARENA_HEIGHT } from './Config';
-import { GameEngine } from './GameEngine';
+import { GameSessionManager, type CompletedMatch } from './GameSessionManager';
 
 interface GameScreenProps {
     onExit: () => void;
+    onRestart: () => void;
 }
 
 /**
@@ -15,9 +16,10 @@ interface GameScreenProps {
  * Bridges React and PixiJS (v8).
  * Handles asset loading state, Strict Mode unmounting, and WebGL initialization.
  */
-export function GameScreen({ onExit }: GameScreenProps) {
+export function GameScreen({ onExit, onRestart }: GameScreenProps) {
     const pixiContainerRef = useRef<HTMLDivElement>(null);
     const [loadError, setLoadError] = useState<boolean>(false);
+    const [completedMatch, setCompletedMatch] = useState<CompletedMatch | null>(null);
     
     // UI states to fulfill the "visible loading state" requirement
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -28,7 +30,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
         let isDestroyed = false;
         let hasInitialized = false;
-        let gameEngine: GameEngine | null = null;
+        let gameSession: GameSessionManager | null = null;
         const app = new PIXI.Application();
 
         const initPixi = async () => {
@@ -112,8 +114,15 @@ export function GameScreen({ onExit }: GameScreenProps) {
                 resizeArena(); // Force initial scale calculation
 
                 // 6. Initialize the core GameEngine and hand over control
-                gameEngine = new GameEngine(app, terrainLayer, actorsLayer, projectilesLayer);
-                gameEngine.startMatch();
+                gameSession = new GameSessionManager(
+                    terrainLayer,
+                    actorsLayer,
+                    projectilesLayer,
+                    (match) => {
+                        if (!isDestroyed) setCompletedMatch(match);
+                    },
+                );
+                gameSession.start();
 
                 // 7. Remove loading screen
                 setIsLoading(false);
@@ -131,7 +140,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
         return () => {
             isDestroyed = true;
-            gameEngine?.destroy();
+            gameSession?.destroy();
             if (hasInitialized) {
                 app.destroy(true, { children: true });
             }
@@ -149,8 +158,20 @@ export function GameScreen({ onExit }: GameScreenProps) {
                     onClick={onExit}
                     style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}
                 >
-                    LEAVE (TEMP)
+                    ABANDON MATCH
                 </button>
+            )}
+
+            {completedMatch && (
+                <PanelModal
+                    title="Game Over"
+                    description={`Score: ${completedMatch.score} · Time: ${Math.ceil(completedMatch.durationMs / 1000)}s`}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <Button label="PLAY AGAIN" onClick={onRestart} />
+                        <Button label="MAIN MENU" onClick={onExit} variant="secondary" />
+                    </div>
+                </PanelModal>
             )}
 
             {/* VISIBLE LOADING STATE */}
