@@ -120,6 +120,30 @@
       "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 128 },
       "sourceSize": { "w": 128, "h": 128 }
     },
+    "sandgreen_vegetation1_tile": {
+      "frame": { "x": 768, "y": 128, "w": 128, "h": 128 },
+      "rotated": false, "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 128 },
+      "sourceSize": { "w": 128, "h": 128 }
+    },
+    "sandgreen_vegetation2_tile": {
+      "frame": { "x": 896, "y": 128, "w": 128, "h": 128 },
+      "rotated": false, "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 128 },
+      "sourceSize": { "w": 128, "h": 128 }
+    },
+    "sandgreen_vegetation3_tile": {
+      "frame": { "x": 768, "y": 256, "w": 128, "h": 128 },
+      "rotated": false, "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 128 },
+      "sourceSize": { "w": 128, "h": 128 }
+    },
+    "sandgreen_vegetation4_tile": {
+      "frame": { "x": 896, "y": 256, "w": 128, "h": 128 },
+      "rotated": false, "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 128 },
+      "sourceSize": { "w": 128, "h": 128 }
+    },
     "sandgreen_lb_tile": {
       "frame": { "x": 640, "y": 384, "w": 128, "h": 128 },
       "rotated": false, "trimmed": false,

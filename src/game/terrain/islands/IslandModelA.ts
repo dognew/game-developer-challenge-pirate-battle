@@ -11,9 +11,9 @@ export class IslandModelA extends TerrainBase {
         // Wraps around the 3x3 island to slow down approaching ships
         this.shallowWaterGrid = [
             ['', '', 'shoal_water_lt_tile', 'shoal_water_mt_tile', 'shoal_water_mt_tile', 'shoal_water_mt_tile', 'shoal_water_rt_tile', '', '', ''],
-            ['', '', 'shoal_water_lm_tile', '', '', '', 'shoal_water_rm_tile', '', '', ''],
-            ['', '', 'shoal_water_lm_tile', '', '', '', 'shoal_water_rm_tile', '', '', ''],
-            ['', '', 'shoal_water_lm_tile', '', '', '', 'shoal_water_rm_tile', '', '', ''],
+            ['', '', 'shoal_water_lm_tile', 'shoal_water_mm_tile', 'shoal_water_mm_tile', 'shoal_water_mm_tile', 'shoal_water_rm_tile', '', '', ''],
+            ['', '', 'shoal_water_lm_tile', 'shoal_water_mm_tile', 'shoal_water_mm_tile', 'shoal_water_mm_tile', 'shoal_water_rm_tile', '', '', ''],
+            ['', '', 'shoal_water_lm_tile', 'shoal_water_mm_tile', 'shoal_water_mm_tile', 'shoal_water_mm_tile', 'shoal_water_rm_tile', '', '', ''],
             ['', '', 'shoal_water_lb_tile', 'shoal_water_mb_tile', 'shoal_water_mb_tile', 'shoal_water_mb_tile', 'shoal_water_rb_tile', '', '', ''],
             ['', '', '', '', '', '', '', '', '', ''],
         ];
