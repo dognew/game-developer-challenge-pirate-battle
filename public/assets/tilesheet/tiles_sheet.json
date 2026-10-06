@@ -331,7 +331,7 @@
       "sourceSize": { "w": 64, "h": 64 }
     },
     "water_tile": {
-      "frame": { "x": 640, "y": 192, "w": 64, "h": 64 },
+      "frame": { "x": 512, "y": 256, "w": 64, "h": 64 },
       "rotated": false, "trimmed": false,
       "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
       "sourceSize": { "w": 64, "h": 64 }
@@ -339,7 +339,7 @@
   },
   "meta": {
     "app": "Pirate Battle Tiles",
-    "image": "../png/default/tiles/tiles_sheet.jpg",
+    "image": "tiles_sheet.png",
     "format": "RGBA8888",
     "size": { "w": 1024, "h": 384 },
     "scale": "1"

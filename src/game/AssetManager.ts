@@ -30,7 +30,7 @@ export class AssetManager {
         if (!this.isInitialized) {
             PIXI.Assets.add({ alias: 'uiSheet', src: `/assets/spritesheet/ui_sheet${suffix}.json` });
             PIXI.Assets.add({ alias: 'shipsSheet', src: `/assets/spritesheet/ships_miscellaneous_sheet${suffix}.xml` });
-            PIXI.Assets.add({ alias: 'tilesSheet', src: `/assets/spritesheet/tiles_sheet${suffix}.json` });
+            PIXI.Assets.add({ alias: 'tilesSheet', src: `/assets/tilesheet/tiles_sheet${suffix}.json` });
             
             this.isInitialized = true;
         }
