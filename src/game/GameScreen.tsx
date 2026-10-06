@@ -112,7 +112,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
                 resizeArena(); // Force initial scale calculation
 
                 // 6. Initialize the core GameEngine and hand over control
-                gameEngine = new GameEngine(app, terrainLayer, actorsLayer);
+                gameEngine = new GameEngine(app, terrainLayer, actorsLayer, projectilesLayer);
                 gameEngine.startMatch();
 
                 // 7. Remove loading screen
