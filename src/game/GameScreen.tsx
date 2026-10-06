@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button';
 import * as PIXI from 'pixi.js';
 import { AssetManager } from './AssetManager';
 import { ARENA_WIDTH, ARENA_HEIGHT } from './Config';
+import { GameEngine } from './GameEngine';
 
 interface GameScreenProps {
     onExit: () => void;
@@ -39,7 +40,6 @@ export function GameScreen({ onExit }: GameScreenProps) {
                 if (isDestroyed) return;
 
                 // 2. Initialize PixiJS Application
-                // The canvas fills the window, but the logical game world is restricted inside arenaContainer
                 await app.init({
                     resizeTo: window,
                     backgroundColor: 0x0f4c75,
@@ -91,7 +91,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
                     const scaleY = screenH / ARENA_HEIGHT;
                     const scale = Math.min(scaleX, scaleY); // Calculates logical arena scale
 
-                    // Center the logical arena
+                    // Center the logical arena container
                     arenaContainer.scale.set(scale);
                     arenaContainer.x = (screenW - ARENA_WIDTH * scale) / 2;
                     arenaContainer.y = (screenH - ARENA_HEIGHT * scale) / 2;
@@ -110,7 +110,11 @@ export function GameScreen({ onExit }: GameScreenProps) {
                 app.renderer.on('resize', resizeArena);
                 resizeArena(); // Force initial scale calculation
 
-                // 6. Remove loading screen
+                // 6. Initialize the core GameEngine and hand over control
+                const gameEngine = new GameEngine(app, terrainLayer, actorsLayer);
+                gameEngine.startMatch();
+
+                // 7. Remove loading screen
                 setIsLoading(false);
 
             } catch (error) {
@@ -134,7 +138,6 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
-            
             {/* PixiJS Canvas Container */}
             <div ref={pixiContainerRef} style={{ width: '100%', height: '100%' }} />
             
