@@ -4,13 +4,19 @@ import { Button } from '../ui/Button';
 import { Options } from './Options';
 import './MainMenu.css';
 
-// Defines the possible states (views) for the menu router
+interface MainMenuProps {
+    onPlay: () => void;
+}
+
 type MenuTab = 'home' | 'options' | 'ranking' | 'history';
 
-export function MainMenu() {
+/**
+ * Main Menu Component
+ * Handles the internal routing for the menu tabs and delegates the 'Play' action to the parent App.
+ */
+export function MainMenu({ onPlay }: MainMenuProps) {
     const [currentTab, setCurrentTab] = useState<MenuTab>('home');
 
-    // State machine to render the correct component inside the panel
     const renderContent = () => {
         switch (currentTab) {
             case 'options':
@@ -38,8 +44,8 @@ export function MainMenu() {
             default:
                 return (
                     <div className="main-menu-buttons">
-                        {/* The PLAY button will eventually trigger the GameEngine mount */}
-                        <Button label="PLAY" onClick={() => console.log('Initialize GameEngine')} />
+                        {/* Ao clicar, chama a função que altera o appState no App.tsx */}
+                        <Button label="PLAY" onClick={onPlay} />
                         <Button label="OPTIONS" onClick={() => setCurrentTab('options')} />
                         
                         <div className="main-menu-secondary">
@@ -55,7 +61,6 @@ export function MainMenu() {
         <div className="main-menu-background">
             <PanelModal>
                 <div className="main-menu-content">
-                    {/* The logo is shared across all tabs and sits at the top of the panel */}
                     <img 
                         src="/assets/png/default/ui/menu/title_pirate_battle.png" 
                         alt="Pirate Battle" 
