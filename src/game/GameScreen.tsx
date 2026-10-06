@@ -3,6 +3,7 @@ import { PanelModal } from '../components/ui/PanelModal';
 import { Button } from '../components/ui/Button';
 import * as PIXI from 'pixi.js';
 import { AssetManager } from './AssetManager';
+import { ARENA_WIDTH, ARENA_HEIGHT } from './Config';
 
 interface GameScreenProps {
     onExit: () => void;
@@ -37,7 +38,8 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
                 if (isDestroyed) return;
 
-                // 2. Initialize PixiJS Application only after assets are ready
+                // 2. Initialize PixiJS Application
+                // The canvas fills the window, but the logical game world is restricted inside arenaContainer
                 await app.init({
                     resizeTo: window,
                     backgroundColor: 0x0f4c75,
@@ -58,32 +60,57 @@ export function GameScreen({ onExit }: GameScreenProps) {
                     pixiContainerRef.current.appendChild(app.canvas);
                 }
 
-                // 3. Setup architectural layers
+                // 3. Setup architectural layers inside a master scalable container
+                const arenaContainer = new PIXI.Container();
+                
                 const waterLayer = new PIXI.Container();
                 const terrainLayer = new PIXI.Container();
                 const actorsLayer = new PIXI.Container();
                 const projectilesLayer = new PIXI.Container();
                 const effectsLayer = new PIXI.Container();
 
-                app.stage.addChild(waterLayer, terrainLayer, actorsLayer, projectilesLayer, effectsLayer);
+                arenaContainer.addChild(waterLayer, terrainLayer, actorsLayer, projectilesLayer, effectsLayer);
+                app.stage.addChild(arenaContainer);
 
-                // 4. Retrieve the pre-loaded texture using its alias
+                // 4. Retrieve the pre-loaded texture and set it to the fixed logical boundaries
                 const waterTexture = PIXI.Assets.get('waterTile');
                 
                 const waterSprite = new PIXI.TilingSprite({
                     texture: waterTexture,
-                    width: app.screen.width,
-                    height: app.screen.height,
+                    width: ARENA_WIDTH,
+                    height: ARENA_HEIGHT,
                 });
-                
-                app.renderer.on('resize', (width, height) => {
-                    waterSprite.width = width;
-                    waterSprite.height = height;
-                });
-
                 waterLayer.addChild(waterSprite);
 
-                // 5. Remove loading screen
+                // 5. Responsive scaling logic (Letterboxing with immersive background)
+                const resizeArena = () => {
+                    const screenW = window.innerWidth;
+                    const screenH = window.innerHeight;
+                    
+                    const scaleX = screenW / ARENA_WIDTH;
+                    const scaleY = screenH / ARENA_HEIGHT;
+                    const scale = Math.min(scaleX, scaleY); // Calculates logical arena scale
+
+                    // Center the logical arena
+                    arenaContainer.scale.set(scale);
+                    arenaContainer.x = (screenW - ARENA_WIDTH * scale) / 2;
+                    arenaContainer.y = (screenH - ARENA_HEIGHT * scale) / 2;
+
+                    // Expand water sprite to cover the out-of-bounds screen margins
+                    waterSprite.width = screenW / scale;
+                    waterSprite.height = screenH / scale;
+                    waterSprite.x = -arenaContainer.x / scale;
+                    waterSprite.y = -arenaContainer.y / scale;
+                    
+                    // Lock the texture pattern to the logical (0,0) grid to maintain seamless tiling
+                    waterSprite.tilePosition.x = -waterSprite.x;
+                    waterSprite.tilePosition.y = -waterSprite.y;
+                };
+
+                app.renderer.on('resize', resizeArena);
+                resizeArena(); // Force initial scale calculation
+
+                // 6. Remove loading screen
                 setIsLoading(false);
 
             } catch (error) {
@@ -106,7 +133,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
     }, []);
 
     return (
-        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
             
             {/* PixiJS Canvas Container */}
             <div ref={pixiContainerRef} style={{ width: '100%', height: '100%' }} />

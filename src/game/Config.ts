@@ -2,6 +2,12 @@
  * Defines the strict types for the game configuration.
  * This ensures consistency between the React UI (Options menu) and the PixiJS Game Engine.
  */
+
+// Logical Arena Bounds (30x18 grid of 64px tiles)
+export const TILE_SIZE = 64;
+export const ARENA_WIDTH = 1920; 
+export const ARENA_HEIGHT = 1152;
+
 export interface ProjectileConfig {
     speed: number;        // Pixels per second
     damage: number;       // Health points reduced on impact
