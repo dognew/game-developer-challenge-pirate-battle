@@ -3,6 +3,8 @@ import { TILE_SIZE, ARENA_WIDTH, ARENA_HEIGHT, DEFAULT_CONFIG } from './Config';
 import { AvailableIslands } from './terrain/islands';
 import { PlayerShip } from './actors/PlayerShip';
 import { Projectile } from './actors/Projectile';
+import { ChaserEnemy } from './actors/ChaserEnemy';
+import { ShooterEnemy } from './actors/ShooterEnemy';
 
 /**
  * Core Game Engine
@@ -16,10 +18,14 @@ export class GameEngine {
 
     private player!: PlayerShip;
     private projectiles: Projectile[] = [];
+    private enemies: (ChaserEnemy | ShooterEnemy)[] = [];
     private ticker: PIXI.Ticker;
 
     private landGrid: boolean[][] = [];
     private shallowWaterGrid: boolean[][] = [];
+
+    private timeSinceLastSpawn: number = 0;
+    private matchTimeMs: number = 0;
 
     constructor(app: PIXI.Application, terrainLayer: PIXI.Container, actorsLayer: PIXI.Container, projectilesLayer: PIXI.Container) {
         this._app = app;
@@ -89,7 +95,7 @@ export class GameEngine {
         this.player.onFire = (projectilesData) => {
             projectilesData.forEach(data => {
                 const config = data.isFront ? DEFAULT_CONFIG.player.frontWeapon.projectile : DEFAULT_CONFIG.player.sideWeapon.projectile;
-                const proj = new Projectile(data.x, data.y, data.heading, config);
+                const proj = new Projectile(data.x, data.y, data.heading, config, 'player'); // Added 'player' owner
                 this.projectilesLayer.addChild(proj);
                 this.projectiles.push(proj);
             });
@@ -112,38 +118,166 @@ export class GameEngine {
         this._actorsLayer.addChild(this.player);
     }
 
+    /**
+     * Attempts to spawn an enemy in a valid, clear location far from the player.
+     */
+    private spawnEnemy(): void {
+        let spawnX = 0;
+        let spawnY = 0;
+        let validSpawn = false;
+        let attempts = 0;
+        const MIN_SPAWN_DISTANCE = 600;
+
+        // Try up to 20 times to find a random valid spot
+        while (!validSpawn && attempts < 20) {
+            attempts++;
+            spawnX = Math.random() * ARENA_WIDTH;
+            spawnY = Math.random() * ARENA_HEIGHT;
+
+            const gridX = Math.floor(spawnX / TILE_SIZE);
+            const gridY = Math.floor(spawnY / TILE_SIZE);
+
+            // Boundary check
+            if (gridX < 0 || gridX >= this.landGrid[0].length || gridY < 0 || gridY >= this.landGrid.length) continue;
+
+            // Terrain check
+            if (this.landGrid[gridY][gridX]) continue;
+
+            // Distance from player check
+            const distToPlayer = Math.hypot(spawnX - this.player.x, spawnY - this.player.y);
+            if (distToPlayer < MIN_SPAWN_DISTANCE) continue;
+
+            validSpawn = true;
+        }
+
+        if (!validSpawn) return; // Skip spawning this cycle if no valid spot found
+
+        const rand = Math.random();
+        let enemy: ChaserEnemy | ShooterEnemy;
+        
+        if (rand < DEFAULT_CONFIG.match.spawnDistribution.chaser) {
+            enemy = new ChaserEnemy();
+        } else {
+            enemy = new ShooterEnemy();
+        }
+
+        enemy.x = spawnX;
+        enemy.y = spawnY;
+        this._actorsLayer.addChild(enemy);
+        this.enemies.push(enemy);
+    }
+
     private gameLoop(): void {
         const deltaMs = this.ticker.deltaMS;
-        const prevX = this.player.x;
-        const prevY = this.player.y;
+        this.matchTimeMs += deltaMs;
+        this.timeSinceLastSpawn += deltaMs;
 
-        // Update player
+        // 1. Spawner Logic
+        if (this.timeSinceLastSpawn >= DEFAULT_CONFIG.match.spawnIntervalMs) {
+            this.spawnEnemy();
+            this.timeSinceLastSpawn = 0;
+        }
+
+        // 2. Player Logic
+        const prevPlayerX = this.player.x;
+        const prevPlayerY = this.player.y;
+
         this.player.update(deltaMs);
         
-        // Evaluate player environment and bounds
-        let collided = false;
-        let inShallowWater = false;
+        let playerCollided = false;
+        let playerInShallowWater = false;
 
         if (this.player.x < 0 || this.player.x > ARENA_WIDTH || this.player.y < 0 || this.player.y > ARENA_HEIGHT) {
-            collided = true;
+            playerCollided = true;
         } else {
             const gridX = Math.floor(this.player.x / TILE_SIZE);
             const gridY = Math.floor(this.player.y / TILE_SIZE);
             
             if (gridY >= 0 && gridY < this.landGrid.length && gridX >= 0 && gridX < this.landGrid[0].length) {
-                if (this.landGrid[gridY][gridX]) collided = true;
-                else if (this.shallowWaterGrid[gridY][gridX]) inShallowWater = true;
+                if (this.landGrid[gridY][gridX]) playerCollided = true;
+                else if (this.shallowWaterGrid[gridY][gridX]) playerInShallowWater = true;
             }
         }
 
-        this.player.setInShallowWater(inShallowWater);
-        if (collided) {
-            this.player.x = prevX;
-            this.player.y = prevY;
+        this.player.setInShallowWater(playerInShallowWater);
+        if (playerCollided) {
+            this.player.x = prevPlayerX;
+            this.player.y = prevPlayerY;
             this.player.crash();
         }
 
-        // Process projectiles
+        // 3. Enemies Logic
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            const enemy = this.enemies[i];
+            
+            if (enemy.isDestroyed) {
+                enemy.parent?.removeChild(enemy);
+                this.enemies.splice(i, 1);
+                continue;
+            }
+
+            const prevX = enemy.x;
+            const prevY = enemy.y;
+
+            // AI Decision Making
+            if (enemy instanceof ChaserEnemy) {
+                enemy.chaseTarget(this.player.x, this.player.y);
+            } else if (enemy instanceof ShooterEnemy) {
+                const isShooting = enemy.updateAI(this.player.x, this.player.y, this.matchTimeMs);
+                if (isShooting) {
+                    const config = DEFAULT_CONFIG.enemies.shooter.weapon.projectile;
+                    
+                    // Spawn projectile at the tip of the front cannon
+                    const spawnX = enemy.x + Math.cos(enemy.rotation) * enemy.frontCannon.x - Math.sin(enemy.rotation) * enemy.frontCannon.y;
+                    const spawnY = enemy.y + Math.sin(enemy.rotation) * enemy.frontCannon.x + Math.cos(enemy.rotation) * enemy.frontCannon.y;
+                    
+                    const proj = new Projectile(spawnX, spawnY, enemy.rotation + Math.PI / 2, config, 'enemy'); // Added 'enemy' owner
+                    this.projectilesLayer.addChild(proj);
+                    this.projectiles.push(proj);
+                }
+            }
+
+            enemy.update(deltaMs);
+
+            // Bounds and terrain collision for enemies
+            let collided = false;
+            let inShallowWater = false;
+
+            if (enemy.x < 0 || enemy.x > ARENA_WIDTH || enemy.y < 0 || enemy.y > ARENA_HEIGHT) {
+                collided = true;
+            } else {
+                const gridX = Math.floor(enemy.x / TILE_SIZE);
+                const gridY = Math.floor(enemy.y / TILE_SIZE);
+                
+                if (gridY >= 0 && gridY < this.landGrid.length && gridX >= 0 && gridX < this.landGrid[0].length) {
+                    if (this.landGrid[gridY][gridX]) collided = true;
+                    else if (this.shallowWaterGrid[gridY][gridX]) inShallowWater = true;
+                }
+            }
+
+            enemy.setInShallowWater(inShallowWater);
+            if (collided) {
+                enemy.x = prevX;
+                enemy.y = prevY;
+                enemy.crash();
+            }
+            
+            // Check impact collision with player (Chaser)
+            if (enemy instanceof ChaserEnemy) {
+                const distToPlayer = Math.hypot(enemy.x - this.player.x, enemy.y - this.player.y);
+                if (distToPlayer < 40) { // Arbitrary collision radius
+                    enemy.isDestroyed = true;
+                    
+                    // Player takes damage
+                    this.player.currentHealth -= DEFAULT_CONFIG.enemies.chaser.impactDamage;
+                    if (this.player.currentHealth <= 0) {
+                        console.log("Player is dead!"); // TODO: Game Over
+                    }
+                }
+            }
+        }
+
+        // 4. Process Projectiles
         for (let i = this.projectiles.length - 1; i >= 0; i--) {
             const proj = this.projectiles[i];
             
@@ -165,6 +299,38 @@ export class GameEngine {
                 else if (gridY >= 0 && gridY < this.landGrid.length && gridX >= 0 && gridX < this.landGrid[0].length) {
                     if (this.landGrid[gridY][gridX]) hit = true;
                 }
+                
+                // Entity Hit Detection
+                if (!hit) {
+                    if (proj.ownerType === 'player') {
+                        // Player's bullets hit enemies
+                        for (const enemy of this.enemies) {
+                            if (enemy.isDestroyed) continue;
+                            const dist = Math.hypot(proj.x - enemy.x, proj.y - enemy.y);
+                            if (dist < 32) {
+                                hit = true;
+                                // Manipulação direta da saúde para evitar o TypeError de métodos não reconhecidos
+                                enemy.currentHealth -= proj.damage;
+                                if (enemy.currentHealth <= 0) {
+                                    enemy.isDestroyed = true;
+                                }
+                                break;
+                            }
+                        }
+                    } else if (proj.ownerType === 'enemy') {
+                        // Enemy's bullets hit player
+                        const distToPlayer = Math.hypot(proj.x - this.player.x, proj.y - this.player.y);
+                        if (distToPlayer < 32) {
+                            hit = true;
+                            // Manipulação direta da saúde do jogador
+                            this.player.currentHealth -= proj.damage;
+                            if (this.player.currentHealth <= 0) {
+                                console.log("Player is dead!"); // Placeholder for death event
+                                // Aqui poderá adicionar lógica adicional de fim de jogo posteriormente
+                            }
+                        }
+                    }
+                }
 
                 if (hit) proj.explode();
             }
@@ -178,5 +344,9 @@ export class GameEngine {
             this.player.parent?.removeChild(this.player);
             this.player.destroy({ children: true });
         }
+        this.enemies.forEach(enemy => {
+            enemy.parent?.removeChild(enemy);
+            enemy.destroy({ children: true });
+        });
     }
 }

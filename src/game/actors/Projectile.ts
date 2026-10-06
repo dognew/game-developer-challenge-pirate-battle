@@ -8,19 +8,23 @@ import type { ProjectileConfig } from '../Config';
  */
 export class Projectile extends PIXI.Sprite {
     public isExploding = false;
+    public ownerType: 'player' | 'enemy'; // Added owner tracker
+    public damage: number; // Expose damage for the engine
     
     private distanceTraveled = 0;
     private config: ProjectileConfig;
     private heading: number;
     private explodeTimerMs = 0;
 
-    constructor(x: number, y: number, heading: number, config: ProjectileConfig) {
+    constructor(x: number, y: number, heading: number, config: ProjectileConfig, ownerType: 'player' | 'enemy') {
         super(AssetManager.getShipTexture('cannon_ball.png'));
         this.anchor.set(0.5);
         this.x = x;
         this.y = y;
         this.heading = heading;
         this.config = config;
+        this.ownerType = ownerType;
+        this.damage = config.damage;
         
         // Align visually to the trajectory
         this.rotation = heading;

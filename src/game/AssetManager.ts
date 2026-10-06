@@ -71,6 +71,17 @@ export class AssetManager {
         return texture;
     }
 
+    public static getUiTexture(name: string): PIXI.Texture {
+        const uiSheet = PIXI.Assets.get<PIXI.Spritesheet>('uiSheet');
+        const texture = uiSheet.textures[name];
+
+        if (!texture) {
+            throw new Error(`UI texture "${name}" was not found in the UI spritesheet.`);
+        }
+
+        return texture;
+    }
+
     private static async loadShipTextures(
         image: PIXI.Texture,
         xmlUrl: string,
