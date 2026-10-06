@@ -28,6 +28,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
         let isDestroyed = false;
         let hasInitialized = false;
+        let gameEngine: GameEngine | null = null;
         const app = new PIXI.Application();
 
         const initPixi = async () => {
@@ -111,7 +112,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
                 resizeArena(); // Force initial scale calculation
 
                 // 6. Initialize the core GameEngine and hand over control
-                const gameEngine = new GameEngine(app, terrainLayer, actorsLayer);
+                gameEngine = new GameEngine(app, terrainLayer, actorsLayer);
                 gameEngine.startMatch();
 
                 // 7. Remove loading screen
@@ -130,6 +131,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
         return () => {
             isDestroyed = true;
+            gameEngine?.destroy();
             if (hasInitialized) {
                 app.destroy(true, { children: true });
             }
