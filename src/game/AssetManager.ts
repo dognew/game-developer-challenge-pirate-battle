@@ -3,9 +3,6 @@ import * as PIXI from 'pixi.js';
 export class AssetManager {
     private static isInitialized = false;
 
-    /**
-     * Determines the base path considering pixel density and network quality.
-     */
     public static getQualityPrefix(): 'retina' | 'default' {
         const isRetina = window.devicePixelRatio > 1;
 
@@ -26,26 +23,20 @@ export class AssetManager {
         return 'default';
     }
 
-    /**
-     * Loads all mandatory game assets (Spritesheets and isolated tiles).
-     * Reports progress back to the UI to fulfill the loading state requirement.
-     * 
-     * @param onProgress Callback function receiving progress from 0 to 100.
-     */
     public static async loadGameAssets(onProgress: (progress: number) => void): Promise<void> {
         const quality = this.getQualityPrefix();
         const suffix = quality === 'retina' ? '_retina' : '';
 
-        // Prevent duplicate asset registration during React Strict Mode double invocation
         if (!this.isInitialized) {
             PIXI.Assets.add({ alias: 'uiSheet', src: `/assets/spritesheet/ui_sheet${suffix}.json` });
             PIXI.Assets.add({ alias: 'shipsSheet', src: `/assets/spritesheet/ships_miscellaneous_sheet${suffix}.xml` });
-            PIXI.Assets.add({ alias: 'waterTile', src: `/assets/png/${quality}/tiles/tile_73.png` });
+            PIXI.Assets.add({ alias: 'tilesSheet', src: `/assets/spritesheet/tiles_sheet${suffix}.json` });
+            
             this.isInitialized = true;
         }
 
         try {
-            await PIXI.Assets.load(['uiSheet', 'shipsSheet', 'waterTile'], (progress) => {
+            await PIXI.Assets.load(['uiSheet', 'shipsSheet', 'tilesSheet'], (progress) => {
                 onProgress(Math.round(progress * 100));
             });
         } catch (error) {

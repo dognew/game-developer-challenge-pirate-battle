@@ -73,7 +73,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
                 app.stage.addChild(arenaContainer);
 
                 // 4. Retrieve the pre-loaded texture and set it to the fixed logical boundaries
-                const waterTexture = PIXI.Assets.get('waterTile');
+                const waterTexture = PIXI.Assets.get('water_tile');
                 
                 const waterSprite = new PIXI.TilingSprite({
                     texture: waterTexture,
