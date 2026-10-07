@@ -99,6 +99,13 @@ Select any screenshot to open the full-size image.
       <sub>Introduces the fullscreen experience before the player enters the application.</sub>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <a href="./public/previews/screen-error-load-texture.png"><img src="./public/previews/screen-error-load-texture.png" alt="Loading error screen shown when a connection or game texture fails to load" width="50%" /></a><br />
+      <strong>Asset loading error</strong><br />
+      <sub>Recovery screen for connection timeouts or failed texture loading, with an option to reload the page.</sub>
+    </td>
+  </tr>
 </table>
 
 ## Controls
