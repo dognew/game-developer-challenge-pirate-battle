@@ -15,12 +15,22 @@ export interface PhysicsResult {
  * Handles updates, movement physics, AI triggers, and collision logic.
  */
 export class PhysicsManager {
+    private readonly terrainManager: TerrainManager;
+    private readonly projectilesLayer: PIXI.Container;
+    private readonly projectiles: Projectile[];
+    private readonly enemies: (ChaserEnemy | ShooterEnemy)[];
+
     constructor(
-        private terrainManager: TerrainManager,
-        private projectilesLayer: PIXI.Container,
-        private projectiles: Projectile[],
-        private enemies: (ChaserEnemy | ShooterEnemy)[]
-    ) {}
+        terrainManager: TerrainManager,
+        projectilesLayer: PIXI.Container,
+        projectiles: Projectile[],
+        enemies: (ChaserEnemy | ShooterEnemy)[]
+    ) {
+        this.terrainManager = terrainManager;
+        this.projectilesLayer = projectilesLayer;
+        this.projectiles = projectiles;
+        this.enemies = enemies;
+    }
 
     public update(deltaMs: number, matchTimeMs: number, player: PlayerShip): PhysicsResult {
         const result: PhysicsResult = { playerDefeated: false, scoreGained: 0 };

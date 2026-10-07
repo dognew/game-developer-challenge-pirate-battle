@@ -10,13 +10,25 @@ import { TerrainManager } from './TerrainManager';
  * Handles the instantiation and placement of game actors and entities.
  */
 export class SpawnManager {
+    private readonly terrainManager: TerrainManager;
+    private readonly actorsLayer: PIXI.Container;
+    private readonly projectilesLayer: PIXI.Container;
+    private readonly projectiles: Projectile[];
+    private readonly enemies: (ChaserEnemy | ShooterEnemy)[];
+
     constructor(
-        private terrainManager: TerrainManager,
-        private actorsLayer: PIXI.Container,
-        private projectilesLayer: PIXI.Container,
-        private projectiles: Projectile[],
-        private enemies: (ChaserEnemy | ShooterEnemy)[]
-    ) {}
+        terrainManager: TerrainManager,
+        actorsLayer: PIXI.Container,
+        projectilesLayer: PIXI.Container,
+        projectiles: Projectile[],
+        enemies: (ChaserEnemy | ShooterEnemy)[]
+    ) {
+        this.terrainManager = terrainManager;
+        this.actorsLayer = actorsLayer;
+        this.projectilesLayer = projectilesLayer;
+        this.projectiles = projectiles;
+        this.enemies = enemies;
+    }
 
     public spawnPlayer(occupiedSectors: number[]): PlayerShip {
         const player = new PlayerShip();
