@@ -2,6 +2,10 @@
 
 # Pirate Battle
 
+<p align="center">
+  <img src="./public/previews/screen-mainmenu.png" alt="Pirate Battle" width="100%" />
+</p>
+
 ### A 2D top-down naval combat game
 
 Built with **React**, **TypeScript**, and **PixiJS** as part of a game developer challenge.
@@ -42,7 +46,66 @@ The most significant remaining work is the ranking/history and MSW integration, 
 - Manual pause and a result modal for completed or manually closed matches.
 - Asset loading progress and an initialization error screen.
 
+## Screenshots
+
+Select any screenshot to open the full-size image.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="./public/previews/screen-mainmenu.png"><img src="./public/previews/screen-mainmenu.png" alt="Pirate Battle main menu with Play, Options, Ranking, and Match History actions" width="100%" /></a>
+      <strong>Main menu</strong><br />
+      <sub>Themed entry screen with shortcuts to gameplay, settings, ranking, and match history.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="./public/previews/screen-options.png"><img src="./public/previews/screen-options.png" alt="Options screen for match duration and enemy spawn interval" width="100%" /></a>
+      <strong>Gameplay options</strong><br />
+      <sub>Adjust the match duration and the interval between enemy spawns.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="./public/previews/screen-arena-gameplay.png"><img src="./public/previews/screen-arena-gameplay.png" alt="Naval combat arena with player, enemies, islands, and HUD" width="100%" /></a>
+      <strong>Combat arena</strong><br />
+      <sub>PixiJS gameplay scene with ships, island obstacles, health bars, score, and countdown.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="./public/previews/screen-mobile-controllers.png"><img src="./public/previews/screen-mobile-controllers.png" alt="Mobile gameplay with on-screen movement and firing controls" width="100%" /></a>
+      <strong>Touch controls</strong><br />
+      <sub>On-screen directional and firing buttons arranged for landscape play on mobile.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="./public/previews/screen-paused-gameplay.png"><img src="./public/previews/screen-paused-gameplay.png" alt="Paused game with Resume and Main Menu actions" width="100%" /></a>
+      <strong>Pause</strong><br />
+      <sub>Pause overlay with options to resume the current match or return to the main menu.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="./public/previews/screen-gameover-gameplay.png"><img src="./public/previews/screen-gameover-gameplay.png" alt="Game Over result screen with score and replay actions" width="100%" /></a>
+      <strong>Match result</strong><br />
+      <sub>End-of-match summary with score, elapsed time, replay, and main-menu actions.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="./public/previews/screen-rotation-detection.png"><img src="./public/previews/screen-rotation-detection.png" alt="Mobile orientation prompt asking the player to rotate the device" width="26%" /></a><br />
+      <strong>Orientation guidance</strong><br />
+      <sub>Prompts mobile players to rotate their device to landscape before continuing.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="./public/previews/screen-enter-fullscreen.png"><img src="./public/previews/screen-enter-fullscreen.png" alt="Fullscreen entry prompt before opening the game" width="100%" /></a>
+      <strong>Fullscreen entry</strong><br />
+      <sub>Introduces the fullscreen experience before the player enters the application.</sub>
+    </td>
+  </tr>
+</table>
+
 ## Controls
+
+<p align="center">
+  <img src="./public/previews/screen-mobile-controllers.png" alt="Pirate Battle mobile gameplay with on-screen directional and firing controls" width="100%" />
+</p>
 
 | Action | Keyboard | Touch |
 | --- | --- | --- |
