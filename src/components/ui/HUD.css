@@ -128,61 +128,51 @@
     justify-content: flex-end;
 }
 
-/* --- Generic Round Button (Spritesheet Implementation) --- */
+/* --- Generic Round Button --- */
 .hud-round-btn {
-    width: 64px;
-    height: 64px;
-    background-image: url('/assets/spritesheet/ui_sheet.png');
-    background-repeat: no-repeat;
-    background-position: -868px -588px; /* normal */
-    background-color: transparent;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    background: url('/assets/png/default/ui/controls/button_round_normal.png') center / contain no-repeat;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    outline: none;
     user-select: none;
     -webkit-user-select: none;
 }
 
-.hud-btn-pause { background-position: -716px -748px; }
-.hud-btn-close { background-position: -268px -748px; }
-
-/* D-Pad Buttons */
-.hud-btn-up { background-position: -492px -748px; }
-.hud-btn-left { background-position: -116px -804px; }
-.hud-btn-right { background-position: -172px -804px; }
-.hud-btn-down { 
-    background-position: -492px -748px; 
-    transform: rotate(180deg);
-}
-
-/* Fire Buttons */
-.hud-btn-fire-left { background-position: -380px -748px; }
-.hud-btn-fire-front { background-position: -324px -748px; }
-.hud-btn-fire-right { background-position: -436px -748px; }
-
-/* Scale Effect on ALL round buttons */
 .hud-round-btn:hover {
-    transform: scale(1.05);
+    background-image: url('/assets/png/default/ui/controls/button_round_hover.png');
 }
 
 .hud-round-btn:active {
-    transform: scale(0.95);
-    filter: brightness(0.8);
+    background-image: url('/assets/png/default/ui/controls/button_round_pressed.png');
 }
 
-/* Overrides para botões que já usam transform */
-.hud-btn-down:hover { transform: rotate(180deg) scale(1.05); }
-.hud-btn-down:active { transform: rotate(180deg) scale(0.95); }
+.hud-round-btn:focus-visible {
+    outline: 2px solid #fff4c2;
+    outline-offset: 2px;
+}
+
+.hud-round-btn-icon {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.hud-btn-down .hud-round-btn-icon {
+    transform: rotate(180deg);
+}
 
 .fire-front {
     position: relative;
     top: -40px; 
 }
-.fire-front:hover { transform: scale(1.05); }
-.fire-front:active { transform: scale(0.95); }
 
 /* --- Bottom Area --- */
 .hud-bottom {
@@ -211,8 +201,8 @@
 }
 
 .dpad-center-spacer {
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
 }
 
 /* Fire Controls */
@@ -220,6 +210,20 @@
     display: flex;
     align-items: flex-end;
     gap: 15px;
+}
+
+@media (min-resolution: 2dppx) {
+    .hud-round-btn {
+        background-image: url('/assets/png/retina/ui/controls/button_round_normal.png');
+    }
+
+    .hud-round-btn:hover {
+        background-image: url('/assets/png/retina/ui/controls/button_round_hover.png');
+    }
+
+    .hud-round-btn:active {
+        background-image: url('/assets/png/retina/ui/controls/button_round_pressed.png');
+    }
 }
 
 /* --- Desktop Hidden Rule --- */
