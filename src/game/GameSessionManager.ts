@@ -20,6 +20,9 @@ export class GameSessionManager {
         actorsLayer: PIXI.Container,
         projectilesLayer: PIXI.Container,
         onMatchEnd: (match: CompletedMatch) => void,
+        onPlayerHealthChange: (health: number) => void,
+        onTimeRemainingChange: (timeRemaining: number) => void,
+        onScoreChange: (score: number) => void,
     ) {
         this.onMatchEnd = onMatchEnd;
         this.engine = new GameEngine(
@@ -27,6 +30,9 @@ export class GameSessionManager {
             actorsLayer,
             projectilesLayer,
             (summary) => this.handleMatchEnd(summary),
+            onPlayerHealthChange,
+            onTimeRemainingChange,
+            onScoreChange,
         );
     }
 
@@ -42,6 +48,20 @@ export class GameSessionManager {
 
     public resume(): boolean {
         return !this.isDisposed && this.engine.resumeMatch();
+    }
+
+    public endMatch(): void {
+        if (!this.isDisposed) {
+            this.engine.endMatch();
+        }
+    }
+
+    public fireFront(): void { this.engine.getPlayer()?.fireFront(); }
+    public fireLeft(): void { this.engine.getPlayer()?.fireLeft(); }
+    public fireRight(): void { this.engine.getPlayer()?.fireRight(); }
+    
+    public setPlayerInput(action: string, isPressed: boolean): void {
+        this.engine.getPlayer()?.setInput(action, isPressed);
     }
 
     public destroy(): void {

@@ -39,6 +39,10 @@ export abstract class ShipBase extends PIXI.Container {
     public currentHealth: number;
     public isDead = false;
 
+    public get healthPercentage(): number {
+        return Math.min(100, Math.max(0, (this.currentHealth / this.physics.maxHealth) * 100));
+    }
+
     // Movement intent defined by child classes (Inputs or AI)
     protected intent = { forward: false, backward: false, left: false, right: false };
 

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PanelModal } from '../components/ui/PanelModal';
 import { Button } from '../components/ui/Button';
+import { HUD } from '../components/ui/HUD';
 import * as PIXI from 'pixi.js';
 import { AssetManager } from './AssetManager';
-import { ARENA_WIDTH, ARENA_HEIGHT } from './Config';
+import { ARENA_WIDTH, ARENA_HEIGHT, DEFAULT_CONFIG } from './Config';
 import { GameSessionManager, type CompletedMatch } from './GameSessionManager';
 
 interface GameScreenProps {
@@ -23,6 +24,11 @@ export function GameScreen({ onExit, onRestart }: GameScreenProps) {
     const [loadError, setLoadError] = useState<boolean>(false);
     const [isPaused, setIsPaused] = useState(false);
     const [completedMatch, setCompletedMatch] = useState<CompletedMatch | null>(null);
+    const [playerHealth, setPlayerHealth] = useState(100);
+    const [playerScore, setPlayerScore] = useState(0);
+    const [timeRemaining, setTimeRemaining] = useState(
+        DEFAULT_CONFIG.match.sessionTimeMs / 1000,
+    );
     
     // UI states to fulfill the "visible loading state" requirement
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -40,6 +46,12 @@ export function GameScreen({ onExit, onRestart }: GameScreenProps) {
             isPausedRef.current = false;
             setIsPaused(false);
         }
+    }, []);
+
+    const endGame = useCallback(() => {
+        isPausedRef.current = false;
+        setIsPaused(false);
+        gameSessionRef.current?.endMatch();
     }, []);
 
     useEffect(() => {
@@ -154,6 +166,15 @@ export function GameScreen({ onExit, onRestart }: GameScreenProps) {
                     (match) => {
                         if (!isDestroyed) setCompletedMatch(match);
                     },
+                    (health) => {
+                        if (!isDestroyed) setPlayerHealth(health);
+                    },
+                    (time) => {
+                        if (!isDestroyed) setTimeRemaining(time);
+                    },
+                    (score) => {
+                        if (!isDestroyed) setPlayerScore(score);
+                    },
                 );
                 gameSessionRef.current = gameSession;
                 gameSession.start();
@@ -188,14 +209,19 @@ export function GameScreen({ onExit, onRestart }: GameScreenProps) {
             {/* PixiJS Canvas Container */}
             <div ref={pixiContainerRef} style={{ width: '100%', height: '100%' }} />
             
-            {/* Temporary Exit Button */}
+            {/* Heads Up Display */}
             {!isLoading && !loadError && (
-                <button 
-                    onClick={onExit}
-                    style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}
-                >
-                    ABANDON MATCH
-                </button>
+                <HUD 
+                    health={playerHealth} 
+                    score={playerScore} 
+                    time={timeRemaining} 
+                    onPause={pauseGame} 
+                    onClose={endGame} 
+                    onFireFront={() => gameSessionRef.current?.fireFront()}
+                    onFireLeft={() => gameSessionRef.current?.fireLeft()}
+                    onFireRight={() => gameSessionRef.current?.fireRight()}
+                    onInput={(action, isPressed) => gameSessionRef.current?.setPlayerInput(action, isPressed)}
+                />
             )}
 
             {isPaused && !completedMatch && (
