@@ -12,6 +12,8 @@ Built with **React**, **TypeScript**, and **PixiJS** as part of a game developer
 
 [Challenge Requirements](./README-CHALLENGE.md) · [Architecture Notes](./ARCHITECTURE.md)
 
+[▶ Play Pirate Battle](https://dogpiratebattle.dognew.com.br/)
+
 </div>
 
 ---
@@ -168,7 +170,9 @@ Ranking and Match History are not connected to APIs yet. There is currently no M
 
 ## Deployment
 
-No public deployment URL is configured yet. A working public deployment is a mandatory challenge deliverable.
+**Live game:** [http://dogpiratebattle.dognew.com.br/](http://dogpiratebattle.dognew.com.br/)
+
+A public deployment is required by the challenge. Please use the link above to access the game.
 
 ## Technical documentation
 
