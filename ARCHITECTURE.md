@@ -5,6 +5,7 @@
 
 ## Simulation Cycle & Game Loop
 [TODO: Describe how delta time is calculated and how entities are updated to maintain a stable 60 FPS target independent of frame rate fluctuations.]
+The match ticker can be paused and resumed through `GameSessionManager`; pausing also disables player input and suspends Chaser explosion animations. The React pause modal is triggered with `P`, while its Resume action returns control to the same running session without resetting its timer or score.
 
 ## Collisions System
 [TODO: Detail the AABB collision detection for entities and spatial grid checking for the island tiles.]

@@ -35,6 +35,8 @@ export class GameEngine {
     private matchTimeMs: number = 0;
     private score = 0;
     private matchEnded = false;
+    private matchStarted = false;
+    private matchPaused = false;
     private readonly onMatchEnd: (summary: MatchSummary) => void;
 
     constructor(
@@ -57,13 +59,38 @@ export class GameEngine {
     }
 
     public startMatch(): void {
-        if (this.matchEnded) return;
+        if (this.matchEnded || this.matchStarted) return;
 
+        this.matchStarted = true;
         const occupiedSectors = this.generateArena();
         this.spawnPlayer(occupiedSectors);
 
         this.ticker.add(() => this.gameLoop());
         this.ticker.start();
+    }
+
+    public pauseMatch(): boolean {
+        if (!this.matchStarted || this.matchEnded || this.matchPaused) return false;
+
+        this.matchPaused = true;
+        this.ticker.stop();
+        this.player.setInputEnabled(false);
+        this.enemies.forEach((enemy) => {
+            if (enemy instanceof ChaserEnemy) enemy.pauseExplosion();
+        });
+        return true;
+    }
+
+    public resumeMatch(): boolean {
+        if (!this.matchStarted || this.matchEnded || !this.matchPaused) return false;
+
+        this.matchPaused = false;
+        this.player.setInputEnabled(true);
+        this.enemies.forEach((enemy) => {
+            if (enemy instanceof ChaserEnemy) enemy.resumeExplosion();
+        });
+        this.ticker.start();
+        return true;
     }
 
     private generateArena(): number[] {

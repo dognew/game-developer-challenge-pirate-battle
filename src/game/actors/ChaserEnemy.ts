@@ -86,4 +86,14 @@ export class ChaserEnemy extends ShipBase {
         this.addChild(this.explosion);
         this.explosion.play();
     }
+
+    public pauseExplosion(): void {
+        this.explosion?.stop();
+    }
+
+    public resumeExplosion(): void {
+        if (this.isExploding && !this.isDestroyed) {
+            this.explosion?.play();
+        }
+    }
 }

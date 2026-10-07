@@ -19,6 +19,7 @@ export class PlayerShip extends ShipBase {
     private rightCooldown = 0;
     private leftFireTimer = 0;
     private rightFireTimer = 0;
+    private inputEnabled = true;
 
     public onFire?: (projectiles: { x: number, y: number, heading: number, isFront: boolean }[]) => void;
 
@@ -87,16 +88,29 @@ export class PlayerShip extends ShipBase {
     private onKeyUp = (e: KeyboardEvent): void => { this.setInput(e.key, false); };
 
     public setInput(action: string, isPressed: boolean): void {
-        if (this.isDead) return;
+        if (this.isDead || !this.inputEnabled) return;
 
         const key = action.toLowerCase();
-        if (this.keys.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(this.keys, key)) {
             this.keys[key] = isPressed;
         }
     }
 
+    public setInputEnabled(enabled: boolean): void {
+        this.inputEnabled = enabled;
+        if (enabled) return;
+
+        Object.keys(this.keys).forEach((key) => {
+            this.keys[key] = false;
+        });
+        this.intent.forward = false;
+        this.intent.backward = false;
+        this.intent.left = false;
+        this.intent.right = false;
+    }
+
     public update(deltaMs: number): void {
-        if (this.isDead) return;
+        if (this.isDead || !this.inputEnabled) return;
 
         // Map raw inputs to physics intents before calling super.update
         this.intent.forward = this.keys['w'];

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { PanelModal } from '../components/ui/PanelModal';
 import { Button } from '../components/ui/Button';
 import * as PIXI from 'pixi.js';
@@ -18,12 +18,45 @@ interface GameScreenProps {
  */
 export function GameScreen({ onExit, onRestart }: GameScreenProps) {
     const pixiContainerRef = useRef<HTMLDivElement>(null);
+    const gameSessionRef = useRef<GameSessionManager | null>(null);
+    const isPausedRef = useRef(false);
     const [loadError, setLoadError] = useState<boolean>(false);
+    const [isPaused, setIsPaused] = useState(false);
     const [completedMatch, setCompletedMatch] = useState<CompletedMatch | null>(null);
     
     // UI states to fulfill the "visible loading state" requirement
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [loadingProgress, setLoadingProgress] = useState<number>(0);
+
+    const pauseGame = useCallback(() => {
+        if (gameSessionRef.current?.pause()) {
+            isPausedRef.current = true;
+            setIsPaused(true);
+        }
+    }, []);
+
+    const resumeGame = useCallback(() => {
+        if (gameSessionRef.current?.resume()) {
+            isPausedRef.current = false;
+            setIsPaused(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        const handlePauseKey = (event: KeyboardEvent) => {
+            if (event.key.toLowerCase() !== 'p' || event.repeat) return;
+
+            event.preventDefault();
+            if (isPausedRef.current) {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        };
+
+        window.addEventListener('keydown', handlePauseKey);
+        return () => window.removeEventListener('keydown', handlePauseKey);
+    }, [pauseGame, resumeGame]);
 
     useEffect(() => {
         if (!pixiContainerRef.current) return;
@@ -122,6 +155,7 @@ export function GameScreen({ onExit, onRestart }: GameScreenProps) {
                         if (!isDestroyed) setCompletedMatch(match);
                     },
                 );
+                gameSessionRef.current = gameSession;
                 gameSession.start();
 
                 // 7. Remove loading screen
@@ -140,6 +174,8 @@ export function GameScreen({ onExit, onRestart }: GameScreenProps) {
 
         return () => {
             isDestroyed = true;
+            gameSessionRef.current = null;
+            isPausedRef.current = false;
             gameSession?.destroy();
             if (hasInitialized) {
                 app.destroy(true, { children: true });
@@ -160,6 +196,15 @@ export function GameScreen({ onExit, onRestart }: GameScreenProps) {
                 >
                     ABANDON MATCH
                 </button>
+            )}
+
+            {isPaused && !completedMatch && (
+                <PanelModal title="Paused">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <Button label="RESUME" onClick={resumeGame} />
+                        <Button label="MAIN MENU" onClick={onExit} variant="secondary" />
+                    </div>
+                </PanelModal>
             )}
 
             {completedMatch && (

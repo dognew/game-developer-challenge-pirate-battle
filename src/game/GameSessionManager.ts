@@ -36,6 +36,14 @@ export class GameSessionManager {
         }
     }
 
+    public pause(): boolean {
+        return !this.isDisposed && this.engine.pauseMatch();
+    }
+
+    public resume(): boolean {
+        return !this.isDisposed && this.engine.resumeMatch();
+    }
+
     public destroy(): void {
         if (this.isDisposed) return;
 
